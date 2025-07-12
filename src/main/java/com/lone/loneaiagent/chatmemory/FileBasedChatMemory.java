@@ -1,4 +1,4 @@
-package com.lone.chatmemory;
+package com.lone.loneaiagent.chatmemory;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

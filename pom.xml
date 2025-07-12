@@ -90,6 +90,12 @@
 			<artifactId>kryo</artifactId>
 			<version>5.6.2</version>
 		</dependency>
+		<!-- 支持Markdown文档的解析 RAG的ETL -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-markdown-document-reader</artifactId>
+			<version>1.0.0-M6</version>
+		</dependency>
 
 	</dependencies>
 
