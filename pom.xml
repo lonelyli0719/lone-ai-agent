@@ -78,6 +78,19 @@
 			<artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
 			<version>1.0.0-M6</version>
 		</dependency>
+		<!-- 支持结构化输出 -->
+		<dependency>
+			<groupId>com.github.victools</groupId>
+			<artifactId>jsonschema-generator</artifactId>
+			<version>4.38.0</version>
+		</dependency>
+		<!-- 支持文件会话记忆持久化的序列化(基于Kryo序列化库实现) -->
+		<dependency>
+			<groupId>com.esotericsoftware</groupId>
+			<artifactId>kryo</artifactId>
+			<version>5.6.2</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
