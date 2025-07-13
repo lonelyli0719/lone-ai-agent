@@ -2,6 +2,8 @@ package com.lone.loneaiagent.app;
 
 import com.lone.loneaiagent.advisor.MyLoggerAdvisor;
 import com.lone.loneaiagent.chatmemory.FileBasedChatMemory;
+import com.lone.loneaiagent.rag.LoveAppRagCustomAdvisorFactory;
+import com.lone.loneaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -151,5 +153,71 @@ public class LoveApp {
         return content;
     }
 
+
+    /**
+     * 应用PgVector向量数据库保存向量
+     */
+    @Resource
+    VectorStore pgVectorVectorStore;
+
+    public String doChatWithRagVectorStore(String message, String chatId) {
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                // 开启日志，便于观察效果
+                .advisors(new MyLoggerAdvisor())
+                // 应用RAG检索增强服务(基于PgVector向量存储)
+                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}", content);
+        return content;
+    }
+
+    /**
+     * 应用查询重写器
+     */
+    @Resource
+    private QueryRewriter queryRewriter;
+
+    public String doChatWithReWriteRag(String message, String chatId) {
+        // 查询重写
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                // 使用改写后的查询
+                .user(rewrittenMessage)
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        return content;
+    }
+
+
+    /**
+     * 使用检索器过滤文档
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public String doChatWithCustomerAdvisorRag(String message, String chatId) {
+        // 查询重写
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                // 开启日志，便于观察效果
+                .advisors(new MyLoggerAdvisor())
+                .advisors(LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(loveAppVectorStore,"已婚"))
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        return content;
+    }
 
 }
